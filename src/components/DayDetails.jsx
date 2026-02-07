@@ -96,13 +96,11 @@ const DayDetails = ({
             }
         }
     };
-
     const handleAddSession = async () => {
         if (newSession.studentId && newSession.subject && newSession.startTime && newSession.endTime) {
             setLoading(true);
             const success = await onCreateSession(newSession);
             setLoading(false);
-
             if (success) {
                 setNewSession({
                     studentId: '',
@@ -114,12 +112,10 @@ const DayDetails = ({
             }
         }
     };
-
     // Get day of month
     const getDayOfMonth = () => {
         return date.getDate();
     };
-
     return (
         <div className="bg-amber-300 p-4 md:p-6 h-full w-full flex flex-col">
             {/* Main Session Display Area */}
@@ -158,7 +154,6 @@ const DayDetails = ({
                                         ))}
                                     </select>
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
                                     <input
@@ -170,7 +165,6 @@ const DayDetails = ({
                                         required
                                     />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
                                     <input
@@ -181,7 +175,6 @@ const DayDetails = ({
                                         required
                                     />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
                                     <input
@@ -193,7 +186,6 @@ const DayDetails = ({
                                     />
                                 </div>
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Topic</label>
                                 <input
@@ -204,7 +196,6 @@ const DayDetails = ({
                                     placeholder="Topic for this session"
                                 />
                             </div>
-
                             <div className="flex justify-end space-x-3 pt-4">
                                 <button
                                     onClick={() => setEditingSession(null)}
@@ -250,7 +241,6 @@ const DayDetails = ({
                                 </div>
                             </div>
                         </div>
-
                         <div className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
@@ -262,7 +252,6 @@ const DayDetails = ({
                                     placeholder="Subject"
                                 />
                             </div>
-
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
@@ -278,7 +267,6 @@ const DayDetails = ({
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
                                     <input
@@ -294,7 +282,6 @@ const DayDetails = ({
                                     />
                                 </div>
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Topic</label>
                                 <input
@@ -305,7 +292,6 @@ const DayDetails = ({
                                     placeholder="Topic for this session"
                                 />
                             </div>
-
                             <div className="flex justify-end space-x-3 pt-4">
                                 <button
                                     onClick={handleCancel}
@@ -348,7 +334,6 @@ const DayDetails = ({
                                 <Edit2 className="w-4 h-4" />
                                 <span>{isEditing ? 'Editing' : 'Edit Mode'}</span>
                             </button>
-
                             {isEditing && (
                                 <div className="flex space-x-3">
                                     <button
@@ -366,13 +351,11 @@ const DayDetails = ({
                                 </div>
                             )}
                         </div>
-
                         {/* Subject */}
                         <div className="mb-6">
                             <div className="text-lg text-gray-600 mb-1">Subject</div>
                             <div className="text-3xl font-bold text-gray-800">{currentSession.subject}</div>
                         </div>
-
                         {/* Time */}
                         <div className="mb-8">
                             <div className="text-lg text-gray-600 mb-1">Time</div>
@@ -383,7 +366,6 @@ const DayDetails = ({
                                 </span>
                             </div>
                         </div>
-
                         {/* Session Counter and Navigation */}
                         <div className="flex items-center justify-between pt-2 border-t border-black/20">
                             <button
@@ -397,11 +379,9 @@ const DayDetails = ({
                                 <ChevronLeft className="w-4 h-4" />
                                 <span>Previous</span>
                             </button>
-
                             <div className="text-gray-600">
                                 {currentSessionIndex + 1} / {events.length}
                             </div>
-
                             <button
                                 onClick={handleNextSession}
                                 disabled={currentSessionIndex === events.length - 1 || loading}
@@ -417,7 +397,6 @@ const DayDetails = ({
                     </div>
                 )}
             </div>
-
             {/* Add Session Button (when not in edit mode and no sessions) */}
             {isEditing && !editingSession && events.length === 0 && (
                 <div className="mt-6 text-center">
@@ -429,7 +408,6 @@ const DayDetails = ({
                     </button>
                 </div>
             )}
-
             {/* Add Another Session Button (when in edit mode and has sessions) */}
             {isEditing && !editingSession && events.length > 0 && (
                 <div className="mt-6 text-center">
