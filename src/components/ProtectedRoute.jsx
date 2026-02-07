@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
     // Check if token exists
     if (!isAuthenticated) {
         console.log('Not authenticated, redirecting to login');
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
     
     console.log('Authenticated, rendering children');

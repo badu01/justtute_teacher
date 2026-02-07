@@ -54,7 +54,8 @@ const Login = () => {
 
                 // Force a small delay to ensure state updates
                 setTimeout(() => {
-                    navigate('/sessions', { replace: true });
+                    const from = location.state?.from?.pathname || '/sessions';
+                    navigate(from, { replace: true });
                 }, 100);
 
             } else {
@@ -257,12 +258,12 @@ const Login = () => {
                     ) : (
                         /* Contact Admin Form */
                         <>
-                        <div>
-                            <h2 className="text-4xl font-normal text-white mb-6">Contact Admin</h2>
-                            <button onClick={() => setShowContactForm(false)} className="text-amber-300 hover:text-amber-200 transition-colors">
-                                back
-                            </button>
-                        </div>
+                            <div>
+                                <h2 className="text-4xl font-normal text-white mb-6">Contact Admin</h2>
+                                <button onClick={() => setShowContactForm(false)} className="text-amber-300 hover:text-amber-200 transition-colors">
+                                    back
+                                </button>
+                            </div>
                         </>
                     )}
 
