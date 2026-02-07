@@ -5,6 +5,7 @@ import DayDetails from '../components/DayDetails';
 import DailyTopics from '../components/DailyTopics';
 import { sessionsAPI } from '../services/apiService';
 import { Loader2 } from 'lucide-react';
+import PageLoader from '../components/LoadingScreen';
 
 function ManageSessions() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -238,17 +239,17 @@ function ManageSessions() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-          <p className="mt-2 text-gray-600">Loading sessions...</p>
+          {/* <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />*/}
+          <PageLoader/>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen h-full bg-linear-to-br from-gray-50 to-gray-100">
         {/* Main container */}
         <div className="flex flex-col h-full md:h-screen">
             {/* Upper part - Mobile: Calendar takes 50%, DayDetails takes 50% */}
@@ -282,7 +283,7 @@ function ManageSessions() {
             </div>
 
             {/* Lower part - Mobile: auto height */}
-            <div className="h-auto md:h-1/4">
+            <div className="h-full">
                 <DailyTopics
                     date={selectedDate}
                     currentSession={getCurrentSession()}
