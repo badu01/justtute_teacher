@@ -93,6 +93,7 @@ export const sessionsAPI = {
   // Create a new session
   createSession: async (sessionData) => {
     try {
+      console.log(sessionData);
       const response = await api.post('/teacher/session', sessionData);
       return response.data;
     } catch (error) {

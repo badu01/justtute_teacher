@@ -1,280 +1,177 @@
-// components/DailyTopics.jsx (Fixed height layout)
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Save, X, AlertCircle } from 'lucide-react';
 
-const DailyTopics = ({ 
-  date, 
-  currentSession,
-  isEditing, 
-  onUpdateTopics
-}) => {
+const inputCls = "w-full bg-black border-2 border-zinc-800 text-white text-sm p-3 focus:border-yellow-400 focus:outline-none transition-colors duration-150 placeholder-zinc-600 font-light";
+const labelCls = "text-[10px] font-bold tracking-[0.2em] text-yellow-400 uppercase block mb-1.5";
+
+const DailyTopics = ({ date, currentSession, isEditing, onUpdateTopics }) => {
   const [editingTopics, setEditingTopics] = useState([]);
   const [newTopic, setNewTopic] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Extract topics from current session
-  useEffect(() => {
-    if (currentSession && currentSession.topic) {
-      let topicsArray = [];
-      
-      if (typeof currentSession.topic === 'string') {
-        if (currentSession.topic.includes(',')) {
-          topicsArray = currentSession.topic.split(',')
-            .map(topic => topic.trim())
-            .filter(topic => topic.length > 0);
-        } else if (currentSession.topic.includes('\n')) {
-          topicsArray = currentSession.topic.split('\n')
-            .map(topic => topic.trim())
-            .filter(topic => topic.length > 0);
-        } else {
-          topicsArray = [currentSession.topic.trim()].filter(topic => topic.length > 0);
-        }
-      }
-      
-      setEditingTopics(topicsArray);
-    } else {
-      setEditingTopics([]);
-    }
-  }, [currentSession]);
+  const parseTopics = (session) => {
+    if (!session?.topic) return [];
+    const t = session.topic;
+    if (t.includes(',')) return t.split(',').map(s => s.trim()).filter(Boolean);
+    if (t.includes('\n')) return t.split('\n').map(s => s.trim()).filter(Boolean);
+    return [t.trim()].filter(Boolean);
+  };
+
+  useEffect(() => { setEditingTopics(parseTopics(currentSession)); }, [currentSession]);
 
   const handleSave = async () => {
-    if (!currentSession || !currentSession._id) {
-      console.error('No current session or session ID');
-      return;
-    }
-    
+    if (!currentSession?._id) return;
     setLoading(true);
     try {
-      const topicsString = editingTopics.join(', ');
-      const success = await onUpdateTopics(currentSession._id, topicsString);
-      
-      if (success) {
-        console.log('Topics updated successfully');
-      } else {
-        console.error('Failed to update topics');
-      }
-    } catch (error) {
-      console.error('Error updating topics:', error);
-    } finally {
-      setLoading(false);
-    }
+      await onUpdateTopics(currentSession._id, editingTopics.join(', '));
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
-  const handleAddTopic = () => {
-    if (newTopic.trim()) {
-      setEditingTopics([...editingTopics, newTopic.trim()]);
-      setNewTopic('');
-    }
+  const handleAdd = () => {
+    if (newTopic.trim()) { setEditingTopics([...editingTopics, newTopic.trim()]); setNewTopic(''); }
   };
 
-  const handleRemoveTopic = (index) => {
-    const updatedTopics = [...editingTopics];
-    updatedTopics.splice(index, 1);
-    setEditingTopics(updatedTopics);
-  };
-
-  const handleUpdateTopic = (index, value) => {
-    const updatedTopics = [...editingTopics];
-    updatedTopics[index] = value;
-    setEditingTopics(updatedTopics);
-  };
-
-  const handleReset = () => {
-    if (currentSession && currentSession.topic) {
-      let topicsArray = [];
-      
-      if (typeof currentSession.topic === 'string') {
-        if (currentSession.topic.includes(',')) {
-          topicsArray = currentSession.topic.split(',')
-            .map(topic => topic.trim())
-            .filter(topic => topic.length > 0);
-        } else if (currentSession.topic.includes('\n')) {
-          topicsArray = currentSession.topic.split('\n')
-            .map(topic => topic.trim())
-            .filter(topic => topic.length > 0);
-        } else {
-          topicsArray = [currentSession.topic.trim()].filter(topic => topic.length > 0);
-        }
-      }
-      
-      setEditingTopics(topicsArray);
-    } else {
-      setEditingTopics([]);
-    }
-  };
-
-  const getStudentName = () => {
-    return currentSession ? currentSession.studentName : 'No session selected';
-  };
+  const handleRemove = (i) => setEditingTopics(editingTopics.filter((_, idx) => idx !== i));
+  const handleUpdate = (i, val) => { const t = [...editingTopics]; t[i] = val; setEditingTopics(t); };
+  const handleReset = () => setEditingTopics(parseTopics(currentSession));
 
   return (
-    <div className="bg-[#1f1f1f] h-full w-full flex flex-col">
-      {/* Header - Fixed height */}
-      <div className="flex-shrink-0 p-6 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <BookOpen className="w-6 h-6 text-white" />
-            <div>
-              <h2 className="text-lg font-bold text-white">Session Topics</h2>
-              <p className="text-sm text-gray-400">
-                {currentSession ? currentSession.subject : 'Select a session'} • {getStudentName()}
-              </p>
-            </div>
+    <div className="bg-black h-full w-full flex flex-col border-t-2 border-zinc-900"
+      style={{ fontFamily: "'Unbounded', sans-serif" }}>
+
+      {/* ── Header ── */}
+      <div className="flex-shrink-0 px-5 sm:px-6 py-4 border-b border-zinc-900 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 border border-yellow-400/30 bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-3.5 h-3.5 text-yellow-400" />
           </div>
-          {isEditing && currentSession && (
-            <div className="flex space-x-2">
-              <button
-                onClick={handleReset}
-                disabled={loading}
-                className="px-3 py-1 text-sm text-gray-300 hover:bg-gray-700 rounded transition-colors flex items-center"
-              >
-                <X className="w-3 h-3 mr-1" />
-                Reset
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={loading || !currentSession._id}
-                className="px-3 py-1 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-3 h-3 mr-1" />
-                {loading ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          )}
+          <div>
+            <p className="text-white font-black text-xs leading-none">Session Topics</p>
+            <p className="text-zinc-600 text-[10px] font-light mt-0.5">
+              {currentSession ? `${currentSession.subject} · ${currentSession.studentName}` : 'Select a session'}
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Topics Area - Takes remaining space with proper scrolling */}
-      <div className="flex-1 overflow-hidden px-6">
-        {!currentSession ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400">
-            <AlertCircle className="w-12 h-12 mb-3 text-gray-600" />
-            <p className="text-center">No session selected</p>
-            <p className="text-sm text-gray-500 mt-1">Select a session to view topics</p>
-          </div>
-        ) : isEditing ? (
-          <div className="h-full flex flex-col">
-            {/* Topics list - Scrollable */}
-            <div className="flex-1 overflow-y-auto pr-1">
-              {editingTopics.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-gray-500">
-                  <BookOpen className="w-12 h-12 mb-3 text-gray-600" />
-                  <p>No topics added yet</p>
-                  <p className="text-sm mt-1">Add your first topic below</p>
-                </div>
-              ) : (
-                <div className="space-y-2 pb-4">
-                  {editingTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-800 rounded-lg">
-                      <div className="shrink-0 w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">{index + 1}</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={topic}
-                        onChange={(e) => handleUpdateTopic(index, e.target.value)}
-                        className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter topic..."
-                      />
-                      <button
-                        onClick={() => handleRemoveTopic(index)}
-                        className="p-2 text-red-400 hover:text-red-300 rounded-lg transition-colors hover:bg-gray-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Add Topic Input - Fixed at bottom of scrollable area */}
-            <div className="flex-shrink-0 pt-4 mt-4 border-t border-gray-700">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Add New Topic
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newTopic}
-                  onChange={(e) => setNewTopic(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddTopic()}
-                  className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter a topic for this session..."
-                />
-                <button
-                  onClick={handleAddTopic}
-                  disabled={!newTopic.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Press Enter or click the + button to add
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="h-full flex flex-col">
-            {/* Read-only topics list - Scrollable */}
-            <div className="flex-1 overflow-y-auto pr-1">
-              {editingTopics.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                  <BookOpen className="w-12 h-12 mb-3 text-gray-600" />
-                  <p className="text-center">No topics defined for this session</p>
-                  <p className="text-sm text-gray-500 mt-1">Enable edit mode to add topics</p>
-                </div>
-              ) : (
-                <div className="space-y-3 pb-4">
-                  <div className="text-sm text-gray-400 mb-2">
-                    Topics for {currentSession.subject} with {getStudentName()}:
-                  </div>
-                  {editingTopics.map((topic, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start space-x-4 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="shrink-0 w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">{index + 1}</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-white font-medium">{topic}</div>
-                        {currentSession.subject && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            {currentSession.subject} • Topic {index + 1}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        {isEditing && currentSession && (
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={handleReset} disabled={loading}
+              className="flex items-center gap-1.5 px-3 py-2 border-2 border-zinc-800 text-zinc-500 text-[10px] font-bold tracking-widest hover:border-zinc-600 hover:text-white transition-all disabled:opacity-50">
+              <X className="w-3 h-3" /> RESET
+            </button>
+            <button onClick={handleSave} disabled={loading || !currentSession._id}
+              className="flex items-center gap-1.5 px-3 py-2 bg-yellow-400 text-black text-[10px] font-black tracking-widest hover:bg-yellow-300 transition-colors disabled:opacity-50">
+              {loading
+                ? <><span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" /> SAVING</>
+                : <><Save className="w-3 h-3" /> SAVE</>}
+            </button>
           </div>
         )}
       </div>
 
-      {/* Footer Info - Fixed height */}
-      <div className="shrink-0 px-6 pb-6 pt-4 border-t border-gray-700">
-        <div className="flex justify-between items-center text-sm text-gray-400">
-          <div>
-            {currentSession ? (
-              <>
-                <span className="font-medium text-white">{editingTopics.length}</span> topic{editingTopics.length !== 1 ? 's' : ''} for this session
-              </>
+      {/* ── Body ── */}
+      <div className="flex-1 overflow-hidden px-5 sm:px-6 py-4 flex flex-col">
+
+        {/* No session selected */}
+        {!currentSession && (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <AlertCircle className="w-8 h-8 text-zinc-800" />
+            <p className="text-zinc-600 text-xs font-light">No session selected</p>
+            <p className="text-zinc-800 text-[10px]">Select a session above to view topics</p>
+          </div>
+        )}
+
+        {/* Edit mode */}
+        {currentSession && isEditing && (
+          <div className="flex-1 overflow-hidden flex flex-col gap-4">
+            {/* Topics list */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {editingTopics.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center gap-2 py-8 text-center">
+                  <BookOpen className="w-8 h-8 text-zinc-800" />
+                  <p className="text-zinc-600 text-xs font-light">No topics yet</p>
+                </div>
+              ) : (
+                editingTopics.map((topic, i) => (
+                  <div key={i} className="flex items-center gap-3 border border-zinc-900 bg-zinc-950 p-3">
+                    <span className="w-6 h-6 bg-yellow-400 text-black text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                      {i + 1}
+                    </span>
+                    <input type="text" value={topic} onChange={(e) => handleUpdate(i, e.target.value)}
+                      className="flex-1 bg-transparent border-0 text-white text-sm font-light focus:outline-none placeholder-zinc-600"
+                      placeholder="Topic name..." />
+                    <button onClick={() => handleRemove(i)}
+                      className="w-7 h-7 flex items-center justify-center text-zinc-700 hover:text-red-400 transition-colors flex-shrink-0">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Add topic */}
+            <div className="flex-shrink-0 border-t border-zinc-900 pt-4">
+              <label className={labelCls}>Add New Topic</label>
+              <div className="flex gap-2">
+                <input type="text" value={newTopic} onChange={(e) => setNewTopic(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                  className={inputCls} placeholder="Enter topic and press Enter..." />
+                <button onClick={handleAdd} disabled={!newTopic.trim()}
+                  className="w-12 flex-shrink-0 bg-yellow-400 text-black flex items-center justify-center hover:bg-yellow-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-zinc-700 text-[9px] mt-2 tracking-widest">PRESS ENTER OR CLICK + TO ADD</p>
+            </div>
+          </div>
+        )}
+
+        {/* Read-only mode */}
+        {currentSession && !isEditing && (
+          <div className="flex-1 overflow-y-auto pr-1">
+            {editingTopics.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                <BookOpen className="w-8 h-8 text-zinc-800" />
+                <p className="text-zinc-600 text-xs font-light">No topics defined for this session</p>
+                <p className="text-zinc-800 text-[10px]">Enable edit mode to add topics</p>
+              </div>
             ) : (
-              'Select a session to view topics'
+              <div className="space-y-2">
+                <p className="text-zinc-600 text-[10px] font-bold tracking-widest uppercase mb-3">
+                  {currentSession.subject} · {currentSession.studentName}
+                </p>
+                {editingTopics.map((topic, i) => (
+                  <div key={i} className="flex items-start gap-3 border border-zinc-900 bg-zinc-950 p-4 hover:border-zinc-800 transition-colors">
+                    <span className="w-6 h-6 bg-yellow-400 text-black text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-light">{topic}</p>
+                      <p className="text-zinc-700 text-[9px] tracking-widest uppercase mt-1">
+                        {currentSession.subject} · Topic {i + 1}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-          <div>
-            {currentSession && (
-              <span className="text-gray-500">
-                Session ID: {currentSession._id ? currentSession._id.substring(0, 8) + '...' : 'N/A'}
-              </span>
-            )}
-          </div>
-        </div>
+        )}
+      </div>
+
+      {/* ── Footer ── */}
+      <div className="flex-shrink-0 px-5 sm:px-6 py-3 border-t border-zinc-900 flex items-center justify-between">
+        <span className="text-zinc-700 text-[10px] font-bold tracking-widest">
+          {currentSession
+            ? <><span className="text-yellow-400">{editingTopics.length}</span> topic{editingTopics.length !== 1 ? 's' : ''}</>
+            : 'Select a session'}
+        </span>
+        {currentSession && (
+          <span className="text-zinc-800 text-[9px] tracking-widest font-light">
+            ID: {currentSession._id ? currentSession._id.substring(0, 8) + '...' : 'N/A'}
+          </span>
+        )}
       </div>
     </div>
   );

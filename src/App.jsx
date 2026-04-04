@@ -1,4 +1,6 @@
-import ManageSessions from './pages/ManageSessions'
+// App.js (Updated)
+import ManageSessions from './pages/ManageSessions';
+import Dashboard from './pages/Dashboard'; // Import Dashboard
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -11,7 +13,12 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
                 
-                {/* Protected routes - these will use hash routing */}
+                {/* Protected routes */}
+                <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                } />
                 <Route path="/sessions" element={
                     <ProtectedRoute>
                         <ManageSessions/>
